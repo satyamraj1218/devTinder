@@ -2,39 +2,27 @@ const express = require("express");
 
 const app = express();
 
-app.get("/a{b}cd", (req, res) => {
-  res.send({ firstName: "satyam", lastName: "raj" });
-});
+// app.use("/router", rh1, rh2, rh3, rh4);
+// We can also wrap any of the route handlers inside array, same result
 
-app.get("/user/:userId/:name/:password", (req, res) => {
-  console.log(req.params);
-  // console.log(req.query);
-  res.send({ firstName: "satyam", lastName: "raj" });
-});
-
-app.get("/user", (req, res) => {
-  res.send("Hello from the user route");
-});
-
-app.post("/user", (req, res) => {
-  res.send("Data successfully saved to the database");
-});
-
-app.delete("/user", (req, res) => {
-  res.send("Data successfully deleted from the database");
-});
-
-app.use("/home", (req, res) => {
-  res.send("Hello from the dashboard");
-});
-
-app.use("/test", (req, res) => {
-  res.send("Hello from the test servers");
-});
-
-app.use("/", (req, res) => {
-  res.send("Hello Satyam");
-});
+app.get("/user", [
+  (req, res, next) => {
+    console.log("Route Handler 1");
+    // res.send("Response from the RH1");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Route Handler 2");
+    // res.send("Response from the RH2");
+    next();
+  },
+  ,
+  (req, res, next) => {
+    console.log("Route Handler 3");
+    res.send("Response from the RH3");
+    // next();
+  },
+]);
 
 app.listen(7777, () => {
   console.log("App is listening on port 7777");
