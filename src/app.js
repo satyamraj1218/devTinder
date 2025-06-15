@@ -29,6 +29,44 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+//API: Delete a user by findById
+app.delete("/user", async (req, res) => {
+  try {
+    const userId = req?.body?.userId;
+    const users = await User.findByIdAndDelete(userId);
+    if (!users) res.status(404).send("No users found");
+    else res.send(`User ${userId} deleted successfully`);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+//API: Update a user
+app.patch("/user", async (req, res) => {
+  try {
+    const userId = req?.body?.userId;
+    const data = req?.body;
+    const users = await User.findByIdAndUpdate(userId, data);
+    if (!users) res.status(404).send("No users found to be updated");
+    else res.send(`User ${userId} updated successfully`);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+//API: Update a user by email
+app.patch("/userupdatebyemail", async (req, res) => {
+  try {
+    const userEmail = req?.body?.emailId;
+    const data = req?.body;
+    const users = await User.findOneAndUpdate({ emailId: userEmail }, data);
+    if (!users) res.status(404).send("No users found to be updated");
+    else res.send(`User ${users?._id} updated successfully`);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
 app.post("/signup", async (req, res) => {
   const user = new User(req?.body);
 
