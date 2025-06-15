@@ -1,5 +1,7 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const { connectDb } = require("./config/database");
+const { isValidRequest } = require("./utils/validations");
 const User = require("./models/user");
 const app = express();
 
@@ -67,14 +69,25 @@ app.patch("/user/:userId", async (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req?.body);
   try {
-    if (user?.skills?.length > 10)
-      throw new Error("There cannot be more than 10 skills");
+    //validate the request
+    isValidRequest(req?.body);
+
+    const { firstName, lastName, emailId, password } = req?.body;
+
+    //encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("Error while adding data " + err?.message);
+    res.status(400).send("ERROR: " + err?.message);
   }
 });
 
