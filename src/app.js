@@ -42,10 +42,20 @@ app.delete("/user", async (req, res) => {
 });
 
 //API: Update a user
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   try {
-    const userId = req?.body?.userId;
+    const userId = req?.params?.userId;
     const data = req?.body;
+    const ALLOWED_UPDATES = ["lastName", "gender", "skills", "about"];
+    const isUpdateAllowed = Object.keys(data).find((el) => {
+      return ALLOWED_UPDATES.includes(el) === false;
+    });
+    if (isUpdateAllowed)
+      throw new Error(`Update not allowed for ${isUpdateAllowed}`);
+
+    if (data?.skills?.length > 10)
+      throw new Error("There cannot be more than 10 skills");
+
     const users = await User.findByIdAndUpdate(userId, data, {
       runValidators: true,
     });
@@ -73,6 +83,8 @@ app.post("/signup", async (req, res) => {
   const user = new User(req?.body);
 
   try {
+    if (user?.skills?.length > 10)
+      throw new Error("There cannot be more than 10 skills");
     await user.save();
     res.send("User added successfully");
   } catch (err) {
