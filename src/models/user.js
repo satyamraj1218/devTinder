@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema(
       minLength: 2,
       maxLength: 256,
       validate(value) {
-        if (!(value.includes("@") && value.includes("."))) {
+        if (!validator.isEmail(value)) {
           throw new Error("Invalid Email");
         }
       },
@@ -32,6 +33,11 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       requried: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Not a strong password");
+        }
+      },
     },
     age: {
       type: Number,
@@ -48,6 +54,11 @@ const userSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       default: "https://www.inforwaves.com/home-2/dummy-profile-pic-300x300-1/",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo URL");
+        }
+      },
     },
     about: {
       type: String,

@@ -66,22 +66,8 @@ app.patch("/user/:userId", async (req, res) => {
   }
 });
 
-//API: Update a user by email
-app.patch("/userupdatebyemail", async (req, res) => {
-  try {
-    const userEmail = req?.body?.emailId;
-    const data = req?.body;
-    const users = await User.findOneAndUpdate({ emailId: userEmail }, data);
-    if (!users) res.status(404).send("No users found to be updated");
-    else res.send(`User ${users?._id} updated successfully`);
-  } catch (err) {
-    res.status(400).send("Something went wrong");
-  }
-});
-
 app.post("/signup", async (req, res) => {
   const user = new User(req?.body);
-
   try {
     if (user?.skills?.length > 10)
       throw new Error("There cannot be more than 10 skills");
