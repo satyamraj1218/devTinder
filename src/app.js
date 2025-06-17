@@ -4,8 +4,11 @@ const { connectDb } = require("./config/database");
 const { isValidRequest } = require("./utils/validations");
 const User = require("./models/user");
 const app = express();
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser());
 
 //API: To get a user from DB based on emailId
 app.get("/user", async (req, res) => {
@@ -74,11 +77,35 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid Credentials");
+    }
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      throw new Error("Invalid Credentials");
     } else {
-      const isValidPassword = await bcrypt.compare(password, user.password);
-      if (!isValidPassword) {
-        throw new Error("Invalid Credentials");
-      } else res.send("Login successful!!!");
+      //creating a jwt token
+      const token = await jwt.sign({ _id: user?._id }, "@Satyam$Tinder");
+
+      //Adding the token to cookie and send the response back to the server
+      res.cookie("token", token);
+      res.send("Login successful!!!");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err?.message);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    if (!req?.cookies?.token) throw new Error("Invalid Token");
+    const decryptedTokenDetails = await jwt.verify(
+      req?.cookies?.token,
+      "@Satyam$Tinder"
+    );
+    const { _id } = decryptedTokenDetails;
+    const user = await User.findById(_id);
+    if (user) res.send(user);
+    else {
+      throw new Error("You need to sign in again");
     }
   } catch (err) {
     res.status(400).send("ERROR: " + err?.message);
