@@ -1,57 +1,57 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const { connectDb } = require("./config/database");
-const { isValidRequest } = require("./utils/validations");
-const User = require("./models/user");
+const express = require('express');
+const bcrypt = require('bcrypt');
+const { connectDb } = require('./config/database');
+const { isValidRequest } = require('./utils/validations');
+const User = require('./models/user');
 const app = express();
-const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 app.use(cookieParser());
 
 //API: To get a user from DB based on emailId
-app.get("/user", async (req, res) => {
+app.get('/user', async (req, res) => {
   const userEmail = req?.body?.emailId;
 
   try {
     const userDetails = await User.findOne({ emailId: userEmail });
     if (userDetails) res.send(userDetails);
-    else res.status(404).send("User not found");
+    else res.status(404).send('User not found');
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send('Something went wrong');
   }
 });
 
 //Feed API : To get all the users from db based
-app.get("/feed", async (req, res) => {
+app.get('/feed', async (req, res) => {
   try {
     const users = await User.find({});
     if (users.length != 0) res.send(users);
-    else res.status(404).send("No users found");
+    else res.status(404).send('No users found');
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send('Something went wrong');
   }
 });
 
 //API: Delete a user by findById
-app.delete("/user", async (req, res) => {
+app.delete('/user', async (req, res) => {
   try {
     const userId = req?.body?.userId;
     const users = await User.findByIdAndDelete(userId);
-    if (!users) res.status(404).send("No users found");
+    if (!users) res.status(404).send('No users found');
     else res.send(`User ${userId} deleted successfully`);
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send('Something went wrong');
   }
 });
 
 //API: Update a user
-app.patch("/user/:userId", async (req, res) => {
+app.patch('/user/:userId', async (req, res) => {
   try {
     const userId = req?.params?.userId;
     const data = req?.body;
-    const ALLOWED_UPDATES = ["lastName", "gender", "skills", "about"];
+    const ALLOWED_UPDATES = ['lastName', 'gender', 'skills', 'about'];
     const isUpdateAllowed = Object.keys(data).find((el) => {
       return ALLOWED_UPDATES.includes(el) === false;
     });
@@ -59,60 +59,60 @@ app.patch("/user/:userId", async (req, res) => {
       throw new Error(`Update not allowed for ${isUpdateAllowed}`);
 
     if (data?.skills?.length > 10)
-      throw new Error("There cannot be more than 10 skills");
+      throw new Error('There cannot be more than 10 skills');
 
     const users = await User.findByIdAndUpdate(userId, data, {
       runValidators: true,
     });
-    if (!users) res.status(404).send("No users found to be updated");
+    if (!users) res.status(404).send('No users found to be updated');
     else res.send(`User ${userId} updated successfully`);
   } catch (err) {
-    res.status(400).send("Something went wrong: " + err?.message);
+    res.status(400).send('Something went wrong: ' + err?.message);
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
     const { emailId, password } = req?.body;
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
-      throw new Error("Invalid Credentials");
+      throw new Error('Invalid Credentials');
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw new Error("Invalid Credentials");
+      throw new Error('Invalid Credentials');
     } else {
       //creating a jwt token
-      const token = await jwt.sign({ _id: user?._id }, "@Satyam$Tinder");
+      const token = await jwt.sign({ _id: user?._id }, '@Satyam$Tinder');
 
       //Adding the token to cookie and send the response back to the server
-      res.cookie("token", token);
-      res.send("Login successful!!!");
+      res.cookie('token', token);
+      res.send('Login successful!!!');
     }
   } catch (err) {
-    res.status(400).send("ERROR: " + err?.message);
+    res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get('/profile', async (req, res) => {
   try {
-    if (!req?.cookies?.token) throw new Error("Invalid Token");
+    if (!req?.cookies?.token) throw new Error('Invalid Token');
     const decryptedTokenDetails = await jwt.verify(
       req?.cookies?.token,
-      "@Satyam$Tinder"
+      '@Satyam$Tinder'
     );
     const { _id } = decryptedTokenDetails;
     const user = await User.findById(_id);
     if (user) res.send(user);
     else {
-      throw new Error("You need to sign in again");
+      throw new Error('You need to sign in again');
     }
   } catch (err) {
-    res.status(400).send("ERROR: " + err?.message);
+    res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
-app.post("/signup", async (req, res) => {
+app.post('/signup', async (req, res) => {
   try {
     //validate the request
     isValidRequest(req?.body);
@@ -129,19 +129,19 @@ app.post("/signup", async (req, res) => {
     });
 
     await user.save();
-    res.send("User added successfully");
+    res.send('User added successfully');
   } catch (err) {
-    res.status(400).send("ERROR: " + err?.message);
+    res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
 connectDb()
   .then(() => {
-    console.log("Database connection established!!!");
+    console.log('Database connection established!!!');
     app.listen(7777, () => {
-      console.log("App is listening on port 7777");
+      console.log('App is listening on port 7777');
     });
   })
   .catch((err) => {
-    console.error("Database was not connected");
+    console.error('Database was not connected');
   });

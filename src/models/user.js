@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema(
   {
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
       maxLength: 256,
       validate(value) {
         if (!validator.isEmail(value)) {
-          throw new Error("Invalid Email");
+          throw new Error('Invalid Email');
         }
       },
     },
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
       requried: true,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
-          throw new Error("Not a strong password");
+          throw new Error('Not a strong password');
         }
       },
     },
@@ -46,23 +46,23 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       validate(value) {
-        if (!["male", "female", "others"].includes(value)) {
+        if (!['male', 'female', 'others'].includes(value)) {
           throw new Error(`Invalid gender: ${value}`);
         }
       },
     },
     imageUrl: {
       type: String,
-      default: "https://www.inforwaves.com/home-2/dummy-profile-pic-300x300-1/",
+      default: 'https://www.inforwaves.com/home-2/dummy-profile-pic-300x300-1/',
       validate(value) {
         if (!validator.isURL(value)) {
-          throw new Error("Invalid Photo URL");
+          throw new Error('Invalid Photo URL');
         }
       },
     },
     about: {
       type: String,
-      default: "This is a default about of the user",
+      default: 'This is a default about of the user',
     },
     skills: {
       type: [String],
@@ -71,4 +71,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Users", userSchema);
+module.exports = mongoose.model('Users', userSchema);
