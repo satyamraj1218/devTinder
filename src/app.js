@@ -6,6 +6,7 @@ const User = require('./models/user');
 const app = express();
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -83,10 +84,14 @@ app.post('/login', async (req, res) => {
       throw new Error('Invalid Credentials');
     } else {
       //creating a jwt token
-      const token = await jwt.sign({ _id: user?._id }, '@Satyam$Tinder');
+      const token = await jwt.sign({ _id: user?._id }, '@Satyam$Tinder', {
+        expiresIn: '7d',
+      });
 
       //Adding the token to cookie and send the response back to the server
-      res.cookie('token', token);
+      res.cookie('token', token, {
+        expires: new Date(Date.now() + 56 * 3600000),
+      });
       res.send('Login successful!!!');
     }
   } catch (err) {
@@ -94,20 +99,20 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/profile', async (req, res) => {
+app.get('/profile', userAuth, async (req, res) => {
   try {
-    if (!req?.cookies?.token) throw new Error('Invalid Token');
-    const decryptedTokenDetails = await jwt.verify(
-      req?.cookies?.token,
-      '@Satyam$Tinder'
-    );
-    const { _id } = decryptedTokenDetails;
-    const user = await User.findById(_id);
-    if (user) res.send(user);
-    else {
-      throw new Error('You need to sign in again');
-    }
+    res.send(req?.user);
   } catch (err) {
+    res.status(400).send('ERROR: ' + err?.message);
+  }
+});
+
+app.post('/sendrequest', userAuth, async (req, res) => {
+  try {
+    res.send(
+      `Connection Request sent by ${req?.user?.firstName} ${req?.user?.lastName}`
+    );
+  } catch (error) {
     res.status(400).send('ERROR: ' + err?.message);
   }
 });
