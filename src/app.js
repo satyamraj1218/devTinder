@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 const { connectDb } = require('./config/database');
-const { authRouter, profileRouter, requestRouter } = require('./routers');
+const { authRouter, profileRouter, requestRouter, userRouter } = require('./routers');
 
 const cookieParser = require('cookie-parser');
 
@@ -12,6 +12,7 @@ app.use(cookieParser());
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', requestRouter);
+app.use('/', userRouter);
 
 connectDb()
   .then(() => {

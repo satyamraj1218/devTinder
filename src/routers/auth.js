@@ -57,10 +57,7 @@ authRouter.patch('/updatepassword', userAuth, async (req, res) => {
   try {
     const { oldPassword, newPassword, confirmNewPassword } = req?.body;
     //take an input for old password -> new password -> confirm new password
-    const isOldPasswordValid = await bcrypt.compare(
-      oldPassword,
-      req?.user?.password
-    );
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, req?.user?.password);
 
     if (!isOldPasswordValid) {
       throw new Error('Your old password is not correct');
@@ -80,18 +77,14 @@ authRouter.patch('/updatepassword', userAuth, async (req, res) => {
 
     await loggedInUser.save();
 
-    res.send(
-      `Hey ${loggedInUser?.firstName}!! Your password was updated successfully`
-    );
+    res.send(`Hey ${loggedInUser?.firstName}!! Your password was updated successfully`);
   } catch (err) {
     res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
 authRouter.post('/logout', (req, res) => {
-  res
-    .cookie('token', null, { expires: new Date(Date.now()) })
-    .send('Logged Out Successfully');
+  res.cookie('token', null, { expires: new Date(Date.now()) }).send('Logged Out Successfully');
 });
 
 module.exports = authRouter;
