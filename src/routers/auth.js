@@ -24,9 +24,9 @@ authRouter.post('/signup', async (req, res) => {
     });
 
     await user.save();
-    res.send('User added successfully');
+    return res.send('User added successfully');
   } catch (err) {
-    res.status(400).send('ERROR: ' + err?.message);
+    return res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
@@ -46,10 +46,10 @@ authRouter.post('/login', async (req, res) => {
 
       //Adding the token to cookie and send the response back to the server
       res.cookie('token', token);
-      res.send('Login successful!!!');
+      return res.send(user);
     }
   } catch (err) {
-    res.status(400).send('ERROR: ' + err?.message);
+    return res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
@@ -77,14 +77,16 @@ authRouter.patch('/updatepassword', userAuth, async (req, res) => {
 
     await loggedInUser.save();
 
-    res.send(`Hey ${loggedInUser?.firstName}!! Your password was updated successfully`);
+    return res.send(`Hey ${loggedInUser?.firstName}!! Your password was updated successfully`);
   } catch (err) {
-    res.status(400).send('ERROR: ' + err?.message);
+    return res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
 authRouter.post('/logout', (req, res) => {
-  res.cookie('token', null, { expires: new Date(Date.now()) }).send('Logged Out Successfully');
+  return res
+    .cookie('token', null, { expires: new Date(Date.now()) })
+    .send('Logged Out Successfully');
 });
 
 module.exports = authRouter;

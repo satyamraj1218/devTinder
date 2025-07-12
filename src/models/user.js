@@ -54,7 +54,8 @@ const userSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      default: 'https://www.inforwaves.com/home-2/dummy-profile-pic-300x300-1/',
+      default:
+        'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740',
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error('Invalid Photo URL');

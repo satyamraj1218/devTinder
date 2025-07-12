@@ -48,7 +48,7 @@ requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res)
       data,
     });
   } catch (error) {
-    res.status(400).send('ERROR: ' + error?.message);
+    return res.status(400).send('ERROR: ' + error?.message);
   }
 });
 
@@ -75,7 +75,7 @@ requestRouter.post('/request/review/:status/:requestId', userAuth, async (req, r
     const updatedData = await requestDetails.save();
     return res.json({ message: `Request ${status} successfully`, updatedData });
   } catch (err) {
-    res.status(400).send('ERROR: ' + err?.message);
+    return res.status(400).send('ERROR: ' + err?.message);
   }
 });
 
